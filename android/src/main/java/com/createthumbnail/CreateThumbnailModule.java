@@ -63,7 +63,7 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
             cleanDir(thumbDir, CACHE_DIR_MAX_SIZE / 2);
         }
 
-        handler.post(new ThumbRunnable(thumbnailDir, options, promise));
+        handler.post(new ThumbRunnable(this.reactContext,thumbnailDir, options, promise));
 
     }
 
