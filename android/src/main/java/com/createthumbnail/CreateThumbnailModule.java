@@ -1,4 +1,4 @@
-package com.createthumbnail;
+package com.reactlibrary;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
