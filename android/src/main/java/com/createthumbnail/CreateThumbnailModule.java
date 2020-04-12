@@ -124,29 +124,24 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
 
             File file = new File(thumbnailDir, fileName);
 
-            if (file.exists()) {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-
-                options.inJustDecodeBounds = true;
-
-                BitmapFactory.decodeFile(file.getPath(), options);
-
-                resultMap.putString("path", "file://" + thumbnailDir + '/' + fileName);
-                resultMap.putDouble("width", options.outWidth);
-                resultMap.putDouble("height", options.outHeight);
-
-                mContext.get().runOnJSQueueThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        promise.resolve(resultMap);
-                    }
-                });
-                return;
-            }
-
             OutputStream fOut = null;
 
             try {
+                if (file.exists()) {
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+
+                    options.inJustDecodeBounds = true;
+                    options.inSampleSize = 4;
+
+                    BitmapFactory.decodeFile(file.getPath(), options);
+
+                    resultMap.putString("path", "file://" + thumbnailDir + '/' + fileName);
+                    resultMap.putDouble("width", options.outWidth);
+                    resultMap.putDouble("height", options.outHeight);
+
+                    promise.resolve(resultMap);
+                    return;
+                }
 
                 file.createNewFile();
 
@@ -179,20 +174,9 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
                 resultMap.putDouble("width", image.getWidth());
                 resultMap.putDouble("height", image.getHeight());
 
-
-                mContext.get().runOnJSQueueThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        promise.resolve(resultMap);
-                    }
-                });
-            } catch (final Exception e) {
-                mContext.get().runOnJSQueueThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        promise.reject("CreateThumbnail_ERROR", e);
-                    }
-                });
+                promise.resolve(resultMap);
+            } catch (Exception e) {
+                promise.reject("CreateThumbnail_ERROR", e);
             }
 
         }
