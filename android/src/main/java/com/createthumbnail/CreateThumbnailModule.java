@@ -36,6 +36,7 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
         super(reactContext);
         this.reactContext = reactContext;
         HandlerThread thread = new HandlerThread("thumb");
+        thread.start();
         handler = new Handler(thread.getLooper());
     }
 
