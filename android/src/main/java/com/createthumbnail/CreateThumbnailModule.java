@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
@@ -21,6 +22,7 @@ import org.apache.commons.io.comparator.LastModifiedFileComparator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -99,12 +101,14 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
         private ReadableMap options;
         private Promise promise;
         private MediaMetadataRetriever retriever;
+        private WeakReference<ReactApplicationContext> mContext;
 
-        public ThumbRunnable(String thumbnailDir, ReadableMap options, Promise promise) {
+        public ThumbRunnable(ReactApplicationContext context, String thumbnailDir, ReadableMap options, Promise promise) {
             this.thumbnailDir = thumbnailDir;
             this.options = options;
             this.promise = promise;
             this.retriever = new MediaMetadataRetriever();
+            this.mContext = new WeakReference<>(context);
 
         }
 
@@ -116,7 +120,7 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
             int timeStamp = options.hasKey("timeStamp") ? options.getInt("timeStamp") : 1;
             String fileName = "thumb-" + md5(filePath) + "." + format;
 
-            WritableMap resultMap = Arguments.createMap();
+            final WritableMap resultMap = Arguments.createMap();
 
             File file = new File(thumbnailDir, fileName);
 
@@ -131,7 +135,12 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
                 resultMap.putDouble("width", options.outWidth);
                 resultMap.putDouble("height", options.outHeight);
 
-                promise.resolve(resultMap);
+                mContext.get().runOnJSQueueThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        promise.resolve(resultMap);
+                    }
+                });
                 return;
             }
 
@@ -170,9 +179,20 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
                 resultMap.putDouble("width", image.getWidth());
                 resultMap.putDouble("height", image.getHeight());
 
-                promise.resolve(resultMap);
+
+                mContext.get().runOnJSQueueThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        promise.resolve(resultMap);
+                    }
+                });
             } catch (Exception e) {
-                promise.reject("CreateThumbnail_ERROR", e);
+                mContext.get().runOnJSQueueThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        promise.reject("CreateThumbnail_ERROR", e);
+                    }
+                });
             }
 
         }
