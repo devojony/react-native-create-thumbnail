@@ -186,7 +186,7 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
                         promise.resolve(resultMap);
                     }
                 });
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 mContext.get().runOnJSQueueThread(new Runnable() {
                     @Override
                     public void run() {
