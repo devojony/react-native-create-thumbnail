@@ -7,6 +7,7 @@ import android.os.Build.VERSION;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -63,7 +64,7 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
             cleanDir(thumbDir, CACHE_DIR_MAX_SIZE / 2);
         }
 
-        handler.post(new ThumbRunnable(this.reactContext,thumbnailDir, options, promise));
+        handler.post(new ThumbRunnable(this.reactContext, thumbnailDir, options, promise));
 
     }
 
@@ -109,7 +110,6 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
             this.promise = promise;
             this.retriever = new MediaMetadataRetriever();
             this.mContext = new WeakReference<>(context);
-
         }
 
         @Override
@@ -119,6 +119,8 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
             String format = options.hasKey("format") ? options.getString("format") : "jpeg";
             int timeStamp = options.hasKey("timeStamp") ? options.getInt("timeStamp") : 1;
             String fileName = "thumb-" + md5(filePath) + "." + format;
+            Log.e("filePath", "run: " + filePath);
+            Log.e("time", "run: " + timeStamp);
 
             final WritableMap resultMap = Arguments.createMap();
 
