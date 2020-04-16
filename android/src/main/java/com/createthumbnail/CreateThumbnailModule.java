@@ -133,7 +133,6 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
                     BitmapFactory.Options options = new BitmapFactory.Options();
 
                     options.inJustDecodeBounds = true;
-                    options.inSampleSize = 4;
 
                     BitmapFactory.decodeFile(file.getPath(), options);
 
@@ -178,6 +177,8 @@ public class CreateThumbnailModule extends ReactContextBaseJavaModule {
 
                 promise.resolve(resultMap);
             } catch (Exception e) {
+                Log.e("出错的FilePath", filePath );
+                file.delete();
                 promise.reject("CreateThumbnail_ERROR", e);
             }
 
